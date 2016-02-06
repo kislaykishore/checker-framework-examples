@@ -1,0 +1,57 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+
+mainClassName = 'org.kishore.Nullability'
+
+sourceCompatibility = 1.8
+version = '1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart',
+                   'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+	checker
+}
+
+dependencies {
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+	checker 'org.checkerframework:jdk8:1.9.6'
+	checker 'org.checkerframework:checker:1.9.6'
+	compile configurations.checker.dependencies
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+sourceSets{
+	eclipse.classpath.plusConfigurations += [ configurations.checker ]
+}
+
+compileJava {
+	options.fork = true
+	options.compilerArgs = [
+			"-Xbootclasspath/p:${configurations.checker.asPath}",
+			'-processor', 'org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.tainting.TaintingChecker',
+			'-implicit:class',
+			'-AprintErrorStack'
+	]
+}
+
+test {
+    systemProperties 'property': 'value'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
